@@ -43,6 +43,8 @@ private:
 
 	static char *CreateTempFilename(char *filename, int pass, int run);
 
+	
+
 private:
 	int _recLength;
 	int _numBufPages;
@@ -50,6 +52,7 @@ private:
 	char *_outFile;
 	short *_fieldSizes;
 	int _sortKeyIndex;
+	TupleOrder _sortOrder;
 };
 
 

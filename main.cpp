@@ -22,12 +22,12 @@ int main(int argc, char *argv[])
 	minibase_globals = new SystemDefs(status, dbName, logName, 2000, 500, 1000);
 
 	if (status != OK) {
-		cerr << "ERROR: Couldn'initialize the Minibase globals" << endl;
-		minibase_errors.show_errors();
+	cerr << "ERROR: Couldn'initialize the Minibase globals" << endl;
+	minibase_errors.show_errors();
 
-		cerr << "Hit [enter] to continue..." << endl;
-		cin.get();
-		exit(1);
+	cerr << "Hit [enter] to continue..." << endl;
+	cin.get();
+	exit(1);
 	}
 
 	SortTestDriver std;

@@ -48,9 +48,9 @@ bool SortTestDriver::TestAll()
 	bool succeed = true;
 
 	succeed = TestSortOnly();
-	succeed = TestOneMerge();
-	succeed = TestMulMerge();
-	succeed = TestRandInt();
+	//succeed = TestOneMerge();
+	//succeed = TestMulMerge();
+	//succeed = TestRandInt();
 
 	return succeed;
 }
