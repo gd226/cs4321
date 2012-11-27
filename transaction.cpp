@@ -19,29 +19,93 @@ Status Transaction::AbortTransaction()
 
 void Transaction::InsertLock(int oid, bool shared)
 {
-	// TODO : Add your code here.
+	bool LockRes = true;
+	if (!shared)
+		LockRes = LockManager::AcquireExclusiveLock(this->tid, oid);
+	else 
+		LockRes = LockManager::AcquireSharedLock(this->tid, oid);
+
+	if (!LockRes){
+		AbortTransaction();
+		return;
+	}
+
+	pair <int, bool> NewPair(oid, shared);
+	if (shared)
+		LockList.push_back(NewPair);
+	else
+	{
+		int i;
+		for(i = 0; i < LockList.size(); i++)
+		{
+			if (LockList.at(i).first == oid)
+			{
+				LockList.at(i).second = shared;
+				break;
+			}
+		}
+		if (i == LockList.size())
+			LockList.push_back(NewPair);
+	}
 }
 
 void Transaction::ReleaseAllLocks()
 {
-	// TODO : Add your code here.
+	int i;
+	for (i = LockList.size() - 1; i > 0; i--)
+	{
+		if(LockList.at(i).second)
+			LockManager::ReleaseSharedLock(this->tid, LockList.at(i).first);
+		else
+			LockManager::ReleaseExclusiveLock(this->tid, LockList.at(i).first);
+		LockList.pop_back();;
+	}
 }
 
 Status Transaction::Read(KeyType key, DataType &value)
 {
-	// TODO : Add your code here.
+	int LockNo = LockList.size();
+	InsertLock(key, true);
+	if (LockList.size() != LockNo + 1)
+		return FAIL;
+	TSHI->GetValue(key, value);
 	return OK;
 }
 
 Status Transaction::AddWritePair(KeyType key, DataType value, OpType op)
 {
-	// TODO : Add your code here.
+	KVP NewKVP = {key, value, op}; 
+	writeList.push_back(NewKVP);
 	return OK;
 }
 
 Status Transaction::GroupWrite()
 {
-	// TODO : Add your code here.
+	vector<KVP>::iterator it;
+	int LockNo = LockList.size();
+	for(it = writeList.begin(); it < writeList.end(); it++)
+	{
+		InsertLock(it->key, false);
+		if (LockList.size() != LockNo + 1)
+			break;
+		else
+			LockNo++;
+	}
+	if (LockList.size() != LockNo)
+		return FAIL;
+
+	this ->status = GROUPWRITE;
+	for(int i = writeList.size() - 1; i > 0; i--)
+	{
+		KVP it = writeList.at(i);
+		if (it.op == UPDATE)
+			TSHI->UpdateValue(it.key, it.value);
+		else if (it.op == DELETE)
+			TSHI->DeleteKey(it.key);
+		else if (it.op == INSERT)
+			TSHI->InsertKeyValue(it.key, it.value);
+		writeList.pop_back();
+	}
 	return OK;
 }
 
