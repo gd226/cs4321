@@ -52,13 +52,13 @@ void Transaction::InsertLock(int oid, bool shared)
 void Transaction::ReleaseAllLocks()
 {
 	int i;
-	for (i = LockList.size() - 1; i > 0; i--)
+	for (i = LockList.size() - 1; i >= 0; i--)
 	{
 		if(LockList.at(i).second)
 			LockManager::ReleaseSharedLock(this->tid, LockList.at(i).first);
 		else
 			LockManager::ReleaseExclusiveLock(this->tid, LockList.at(i).first);
-		LockList.pop_back();;
+		LockList.pop_back();
 	}
 }
 
@@ -95,7 +95,7 @@ Status Transaction::GroupWrite()
 		return FAIL;
 
 	this ->status = GROUPWRITE;
-	for(int i = writeList.size() - 1; i > 0; i--)
+	for(int i = writeList.size() - 1; i >= 0; i--)
 	{
 		KVP it = writeList.at(i);
 		if (it.op == UPDATE)
